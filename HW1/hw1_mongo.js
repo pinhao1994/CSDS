@@ -4,9 +4,9 @@ db.tweets.find(
 ).count()
 
 // 2. the number of tweets that are replies to another tweet
-db.tweets.find(
-{ "in_reply_to_status_id": {$ne: null}}
-).count()
+db.tweets.distinct(
+"id", { "in_reply_to_status_id": {$ne: null}}
+).length
 
 // 3. the five user IDs (field name: uid) that have tweeted the most
 db.tweets.aggregate([

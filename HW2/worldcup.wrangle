@@ -1,0 +1,21 @@
+delete row: matches([column1], `\|-`)
+delete row: in(sourcerownumber(), [1,171,172,173])
+replace col: column1 with: '' on: `\|align=center`
+replace col: column1 with: '' on: `\|bgcolor=\#FFF68F` global: true
+replace col: column1 with: '' on: `[[\#1\|\*]]` global: true
+delete row: matches([column1], `{start}\|{digit}+{end}`)
+extractlist col: column1 on: `\|{digit}{4}` as: 'Years'
+extract col: column1 on: `fb\|{upper}{3}` quote: ''
+replace col: column2 with: '' on: `fb\|` global: true
+set col: column2 value: fill(column2) order: sourcerownumber()
+replace col: Years with: '' on: `\|` global: true
+rename col: column2 to: 'Country'
+settype col: Years type: 'Array'
+derive value: (mod(rownumber(), 5)) - 1 group: Country order: sourcerownumber() as: 'Position'
+replace col: Position with: '4' on: `-1` global: true
+flatten col: Years
+drop col: column1
+delete row: ismissing([Years])
+aggregate value: countif(Position == 1) group: Country
+sort order: -countif
+rename col: countif to: 'Count_of_first_position'

@@ -1,0 +1,51 @@
+delete row: matches([column1], `{start}!`)
+delete row: matches([column1], `\|-`)
+delete row: matches([column1], `{start}=`)
+delete row: matches([column1], `DO NOT ADD FILMS`)
+delete row: matches([column1], `class=|style=|rowspan=`)
+delete row: in(sourcerownumber(), [2, 183, 179, 359, 362, 537, 536, 660, 358])
+split col: column1 on: '||' limit: 1
+replace col: column2 with: '' on: `\| \'\'[[` global: true
+replace col: column2 with: '' on: `]]\'\' ` global: true
+replace col: column2 with: '' on: `{any}+\|`
+replace col: column2 with: '' on: `\|\'\'[[` global: true
+rename col: column2 to: 'MovieName'
+split col: column3 on: '||' limit: 1
+replace col: column1 with: '' on: ` [[` global: true
+replace col: column1 with: '' on: `]] ` global: true
+replace col: column1 with: '' on: `{start}{delim}`
+replace col: column1 with: '' on: `{delim}{end}`
+rename col: column1 to: 'ProductionDistributionHouse'
+split col: column2 on: `\(director`
+replace col: column1 with: '' on: ` [[` global: true
+replace col: column1 with: '' on: `]] ` global: true
+replace col: column1 with: '' on: `{start}{delim}`
+replace col: column1 with: '' on: `{delim}{end}`
+rename col: column1 to: 'Director'
+split col: column3 on: '||' limit: 1
+drop col: column2
+split col: column4 on: `\|\|`
+replace col: column1 with: '' on: ` [[` global: true
+replace col: column1 with: '' on: `]]` global: true
+replace col: column1 with: '' on: `{start}{delim}`
+replace col: column1 with: '' on: `{delim}{end}`
+split col: column1 on: `\|`
+replace col: column4 with: '' on: ` film\|{any}+` global: true
+set col: column4 value: ifmissing($col, column3)
+drop col: column3
+rename col: column4 to: 'Genre'
+set col: Genre value: ifmissing($col, 'N\/A')
+extract col: column2 on: `publisher={any}+ \||publisher={any}+\|`
+drop col: column2
+replace col: column1 with: '' on: `\|{any}+` global: true
+replace col: column1 with: '' on: `{delim}{end}`
+replace col: column1 with: '' on: `{delim}{end}`
+replace col: column1 with: '' on: `publisher=` global: true
+set col: column1 value: ifmissing($col, 'N\/A')
+replace col: Director with: '' on: `]]{any}+| \({any}+` global: true
+replace col: column1 with: '' on: `[[` global: true
+rename col: column1 to: 'Publisher'
+replace col: ProductionDistributionHouse with: '' on: `/{any}+|\|{any}+|[[|\({any}+`
+replace col: ProductionDistributionHouse with: '' on: `{delim}{end}`
+aggregate value: count() group: ProductionDistributionHouse
+sort order: -row_count
